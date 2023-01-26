@@ -76,11 +76,9 @@ public class NotificacionServiceImpl implements INotificacionService{
      * @date 2023-01-26
      */
     @Override
-    public Boolean sendMulticast()  {
+    public Response sendMulticast(int idPersonal)  {
         try {           
-            RedisConnection<String, String> connection = redisConnectionService.getConnection();
-            String ping = connection.ping();
-            System.out.println(ping);
+           
             List<String> registrationTokens = Arrays.asList(
                     "f5KVZeeWb8NcMvoX3nIuW:APA91bH78X465sy9S89zRG_kKmw_ML2k7gcsGsF46GhSEoL1wwB0xw3Gc9OLmannKp7ERMTZuVWvZcVpoUGixUxGS698JWo7bC30sQfqgD8Oh5udCvJ2YTmISanuRcutJJhm2Ti-kYbN");
             
@@ -92,7 +90,7 @@ public class NotificacionServiceImpl implements INotificacionService{
             BatchResponse response = FirebaseMessaging.getInstance().sendMulticast(message);        
             System.out.println(response.getResponses());
             
-            return true;
+            return null;
           
         } catch (FirebaseException e) {
             System.out.println(e);
@@ -113,24 +111,52 @@ public class NotificacionServiceImpl implements INotificacionService{
      * @date 2023-01-25
      */
     @Override
-    public void getToken() {
-        
+    public Response getToken(int idPersonal) {
+        Response response = new Response();
         try {
-            RedisClient redisClient = new RedisClient(
-            RedisURI.create("redis://10.1.9.73:6379"));
+            RedisConnection<String, String> connection = redisConnectionService.getConnection();                  
+            String value = connection.get("pol_operador_"+idPersonal); 
             
-            RedisConnection<String, String> connection = redisClient.connect();                   
-            String value = connection.get("pol_operador_34150"); 
-            String result = connection.ping();
-            connection.close();
-            redisClient.shutdown();
-          
-        } catch (RedisConnectionException e) {
-            System.out.println(e);
+            response.setStatus(1);
+            if(value != null) {          
+                response.setDescriptionStatus("success");
+                response.setDescription("Token obtenido correctamente");
+                response.setValue(value);
+            }else {               
+                response.setDescriptionStatus("error");
+                response.setDescription("No fue posible obtener el token");
+                response.setValue(value);
+            }
+            return response;
+        }catch (RedisCommandExecutionException e) {
+            logger.error(e.getMessage());
+            response.setStatus(0);
+            response.setDescriptionStatus("error");
+            response.setDescription("No fue posible obtener el token");
+           
+            return response;    
+        } 
+        catch (Exception e) {
+            logger.error(e.getMessage());
+            response.setStatus(0);
+            response.setDescriptionStatus("error");
+            response.setDescription("No fue posible obtener el token");
+           
+            return response;     
         }
         
     }
 
+    /**
+     * registerDevice: registra un nuevo token en redis .
+     * 
+    
+     * @version 0.0.1
+     * @author Oscar Eduardo Guerra Salcedo [OscarGuerra] 
+     * @return Response
+     * @throws Exception 
+     * @date 2023-01-26
+     */
     @Override
     public Response registerDevice(RegistrarToken data) {
         Response response = new Response();

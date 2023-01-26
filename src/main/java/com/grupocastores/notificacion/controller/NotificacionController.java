@@ -47,10 +47,17 @@ public class NotificacionController {
         
     } 
     
-    @PostMapping("/notificacionInsertViaje")
-    public String findTalones(EnviarMensajeRequest data) throws FileNotFoundException, FirebaseMessagingException {
-        Boolean notification = notificacionService.sendMulticast();
+    @GetMapping("/notificacionInsertViaje/{idPersonal}")
+    public Response notificacionViaje(@PathVariable(name="idPersonal") int idPersonal) throws FileNotFoundException, FirebaseMessagingException {
+        Response notification = notificacionService.sendMulticast(idPersonal);
         return null;
+        
+    } 
+    
+    @GetMapping("/getToken/{idPersonal}")
+    public Response getToken(@PathVariable(name="idPersonal") int idPersonal) throws FileNotFoundException, FirebaseMessagingException {
+        Response token = notificacionService.getToken(idPersonal);
+        return token;
         
     } 
     

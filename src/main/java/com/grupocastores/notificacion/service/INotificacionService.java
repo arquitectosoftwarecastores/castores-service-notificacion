@@ -17,10 +17,10 @@ public interface INotificacionService {
      * @version 0.0.1
      * @author Oscar Eduardo Guerra Salcedo [OscarGuerra] 
      * @return void
-     * @throws Exception 
+     * @throws Response 
      * @date 2023-01-26
      */
-    public Boolean sendMulticast();
+    public Response sendMulticast(int idPersonal);
     
     /**
      * connectToRedis:Hace conexion a redis .
@@ -28,19 +28,19 @@ public interface INotificacionService {
     
      * @version 0.0.1
      * @author Oscar Eduardo Guerra Salcedo [OscarGuerra] 
-     * @return void
+     * @return String
      * @throws Exception 
      * @date 2023-01-25
      */
-    public void getToken();
+    public Response getToken(int idPersonal);
     
     /**
-     * registerDevice conexion a redis .
+     * registerDevice: registra un nuevo token en redis
      * 
     
      * @version 0.0.1
      * @author Oscar Eduardo Guerra Salcedo [OscarGuerra] 
-     * @return void
+     * @return Response
      * @throws Exception 
      * @date 2023-01-26
      */

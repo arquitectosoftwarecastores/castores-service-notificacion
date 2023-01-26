@@ -12,5 +12,6 @@ public class Response {
   private int status;
   private String descriptionStatus;
   private String description;
+  private String value;
 
 }
