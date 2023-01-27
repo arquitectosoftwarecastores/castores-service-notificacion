@@ -10,7 +10,7 @@ import com.lambdaworks.redis.*;
 @SpringBootApplication
 @EnableEurekaClient
 @EnableFeignClients
-@EntityScan({ "com.grupocastores.commons.castoresdb", "com.grupocastores.commons.inhouse", "com.grupocastores.commons.oficinas", "com.grupocastores.notificacion.dto"})
+@EntityScan({ "com.grupocastores.notificacion.dto"})
 public class CastoresServiceNotificacionApplication {
 
     public static void main(String[] args) {

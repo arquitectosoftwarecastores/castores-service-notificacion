@@ -1,7 +1,10 @@
 package com.grupocastores.notificacion.service;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,16 +20,13 @@ import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.MulticastMessage;
 import com.grupocastores.notificacion.dto.RegistrarToken;
 import com.grupocastores.notificacion.dto.Response;
-import com.lambdaworks.redis.RedisClient;
 import com.lambdaworks.redis.RedisCommandExecutionException;
 import com.lambdaworks.redis.RedisConnection;
-import com.lambdaworks.redis.RedisURI;
 
-import io.lettuce.core.RedisConnectionException;
+
 
 @Service
 public class NotificacionServiceImpl implements INotificacionService{
@@ -76,26 +76,39 @@ public class NotificacionServiceImpl implements INotificacionService{
      * @date 2023-01-26
      */
     @Override
-    public Response sendMulticast(int idPersonal)  {
+    public Response sendMulticast(List<String> tokens)  {
+        
+        Response response = new Response();
         try {           
-           
-            List<String> registrationTokens = Arrays.asList(
-                    "f5KVZeeWb8NcMvoX3nIuW:APA91bH78X465sy9S89zRG_kKmw_ML2k7gcsGsF46GhSEoL1wwB0xw3Gc9OLmannKp7ERMTZuVWvZcVpoUGixUxGS698JWo7bC30sQfqgD8Oh5udCvJ2YTmISanuRcutJJhm2Ti-kYbN");
+            Date date = new Date();
+            String strDateFormat = "hh:mm:ss";
+            DateFormat dateFormat = new SimpleDateFormat(strDateFormat);
+            String formattedDate= dateFormat.format(date);
+            
+            List<String> registrationTokens = Arrays.asList();
+            
+             tokens.forEach(item -> {
+                 registrationTokens.add(item);
+             });
             
             MulticastMessage message = MulticastMessage.builder()
-                    .putData("message", "Se genero viaje con folio 2021000234")
-                    .putData("time", "2:48885")
+                    .putData("message", "Se te asignó un nuevo viaje")
+                    .putData("time", formattedDate)
                     .addAllTokens(registrationTokens)
                     .build();
-            BatchResponse response = FirebaseMessaging.getInstance().sendMulticast(message);        
-            System.out.println(response.getResponses());
-            
-            return null;
+            BatchResponse res = FirebaseMessaging.getInstance().sendMulticast(message);        
+            response.setStatus(1);
+            response.setDescriptionStatus("success");
+            response.setDescription("Notificacion enviada correctamente");
+            return response;
           
         } catch (FirebaseException e) {
-            System.out.println(e);
+           
             logger.error(e.getMessage());
-            return null;
+            response.setStatus(0);
+            response.setDescriptionStatus("error");
+            response.setDescription("No fue posible enviar la notificacion");
+            return response;
         }
         
     }

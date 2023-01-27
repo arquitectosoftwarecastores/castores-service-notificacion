@@ -20,7 +20,7 @@ public interface INotificacionService {
      * @throws Response 
      * @date 2023-01-26
      */
-    public Response sendMulticast(int idPersonal);
+    public Response sendMulticast(List<String> tokens);
     
     /**
      * connectToRedis:Hace conexion a redis .
