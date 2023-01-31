@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
-import com.grupocastores.notificacion.dto.RegistrarToken;
-import com.grupocastores.notificacion.dto.Response;
+import com.grupocastores.notificacion.dto.RegistrarTokenDTO;
+import com.grupocastores.notificacion.dto.ResponseDTO;
 import com.grupocastores.notificacion.service.INotificacionService;
 
 
@@ -27,22 +27,23 @@ public class NotificacionController {
     
     
     @PostMapping("/registrarDispositivo")
-    public Response registerDevice(@RequestBody RegistrarToken data) throws FileNotFoundException, FirebaseMessagingException {
-        Response response = notificacionService.registerDevice(data);
-        return response;
+    public ResponseDTO registerDevice(@RequestBody RegistrarTokenDTO data) throws FileNotFoundException, FirebaseMessagingException {
+        ResponseDTO responseDTO = notificacionService.registerDevice(data);
+        return responseDTO;
         
     } 
     
     @PostMapping("/sendMulticast")
-    public Response notificacionViaje(List<String> tokens) throws FileNotFoundException, FirebaseMessagingException {
-        Response notification = notificacionService.sendMulticast(tokens);
+    public ResponseDTO notificacionViaje(@RequestBody List<String> tokens) throws FileNotFoundException, FirebaseMessagingException {
+        System.out.println(tokens);
+        ResponseDTO notification = notificacionService.sendMulticast(tokens);
         return null;
         
     } 
     
     @GetMapping("/getToken/{idPersonal}")
-    public Response getToken(@PathVariable(name="idPersonal") int idPersonal) throws FileNotFoundException, FirebaseMessagingException {
-        Response token = notificacionService.getToken(idPersonal);
+    public ResponseDTO getToken(@PathVariable(name="idPersonal") int idPersonal) throws FileNotFoundException, FirebaseMessagingException {
+        ResponseDTO token = notificacionService.getToken(idPersonal);
         return token;
         
     } 

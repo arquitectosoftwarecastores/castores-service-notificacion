@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name="registrarTokes")
-public class RegistrarToken {
+public class RegistrarTokenDTO {
     @Id
     private int idPersonal;
     private String token;

@@ -18,11 +18,20 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.AndroidNotification.Visibility;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
-import com.grupocastores.notificacion.dto.RegistrarToken;
-import com.grupocastores.notificacion.dto.Response;
+import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.WebpushConfig;
+import com.google.firebase.messaging.WebpushFcmOptions;
+import com.google.firebase.messaging.WebpushNotification;
+import com.grupocastores.notificacion.dto.RegistrarTokenDTO;
+import com.grupocastores.notificacion.dto.ResponseDTO;
 import com.lambdaworks.redis.RedisCommandExecutionException;
 import com.lambdaworks.redis.RedisConnection;
 
@@ -76,39 +85,58 @@ public class NotificacionServiceImpl implements INotificacionService{
      * @date 2023-01-26
      */
     @Override
-    public Response sendMulticast(List<String> tokens)  {
+    public ResponseDTO sendMulticast(List<String> tokens)  {
         
-        Response response = new Response();
+        ResponseDTO responseDTO = new ResponseDTO();
         try {           
             Date date = new Date();
             String strDateFormat = "hh:mm:ss";
             DateFormat dateFormat = new SimpleDateFormat(strDateFormat);
             String formattedDate= dateFormat.format(date);
             
-            List<String> registrationTokens = Arrays.asList();
-            
-             tokens.forEach(item -> {
-                 registrationTokens.add(item);
-             });
             
             MulticastMessage message = MulticastMessage.builder()
-                    .putData("message", "Se te asignó un nuevo viaje")
-                    .putData("time", formattedDate)
-                    .addAllTokens(registrationTokens)
-                    .build();
-            BatchResponse res = FirebaseMessaging.getInstance().sendMulticast(message);        
-            response.setStatus(1);
-            response.setDescriptionStatus("success");
-            response.setDescription("Notificacion enviada correctamente");
-            return response;
+                        .putData("time", formattedDate)
+                        .setNotification(Notification.builder()
+                            .setTitle("Viaje asignado")
+                            .setBody("Se te ha asignado un nuevo viaje")
+                            .build())
+                        .setAndroidConfig(AndroidConfig.builder()
+                            .setTtl(3600 * 1000)
+                            .setNotification(AndroidNotification.builder()
+                                .setIcon("https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png")
+                                .setColor("#f45342")
+                                .setVisibility(Visibility.PUBLIC)
+                                .setClickAction("click_action")
+                                .build())
+                            .build())
+                        .setApnsConfig(ApnsConfig.builder()
+                            .setAps(Aps.builder()
+                                    .setCategory("INVITE_CATEGORY")
+                                .setBadge(42)
+                                .build())
+                            .build())
+                        .setWebpushConfig(WebpushConfig.builder()
+                                .setNotification(WebpushNotification.builder().putCustomData("requireInteraction", true).build())
+                                .setFcmOptions(WebpushFcmOptions.withLink("/"))
+                                .build())
+                        .addAllTokens(tokens)
+                        .build();
+            BatchResponse res = FirebaseMessaging.getInstance().sendMulticast(message); 
+            System.out.println(res.getFailureCount());
+            System.out.println(res.getSuccessCount() + " messages were sent successfully");
+            responseDTO.setStatus(1);
+            responseDTO.setDescriptionStatus("success");
+            responseDTO.setDescription("Notificacion enviada correctamente");
+            return responseDTO;
           
         } catch (FirebaseException e) {
            
             logger.error(e.getMessage());
-            response.setStatus(0);
-            response.setDescriptionStatus("error");
-            response.setDescription("No fue posible enviar la notificacion");
-            return response;
+            responseDTO.setStatus(0);
+            responseDTO.setDescriptionStatus("error");
+            responseDTO.setDescription("No fue posible enviar la notificacion");
+            return responseDTO;
         }
         
     }
@@ -124,38 +152,38 @@ public class NotificacionServiceImpl implements INotificacionService{
      * @date 2023-01-25
      */
     @Override
-    public Response getToken(int idPersonal) {
-        Response response = new Response();
+    public ResponseDTO getToken(int idPersonal) {
+        ResponseDTO responseDTO = new ResponseDTO();
         try {
             RedisConnection<String, String> connection = redisConnectionService.getConnection();                  
             String value = connection.get("pol_operador_"+idPersonal); 
             
-            response.setStatus(1);
+            responseDTO.setStatus(1);
             if(value != null) {          
-                response.setDescriptionStatus("success");
-                response.setDescription("Token obtenido correctamente");
-                response.setValue(value);
+                responseDTO.setDescriptionStatus("success");
+                responseDTO.setDescription("Token obtenido correctamente");
+                responseDTO.setValue(value);
             }else {               
-                response.setDescriptionStatus("error");
-                response.setDescription("No fue posible obtener el token");
-                response.setValue(value);
+                responseDTO.setDescriptionStatus("error");
+                responseDTO.setDescription("No fue posible obtener el token");
+                responseDTO.setValue(value);
             }
-            return response;
+            return responseDTO;
         }catch (RedisCommandExecutionException e) {
             logger.error(e.getMessage());
-            response.setStatus(0);
-            response.setDescriptionStatus("error");
-            response.setDescription("No fue posible obtener el token");
+            responseDTO.setStatus(0);
+            responseDTO.setDescriptionStatus("error");
+            responseDTO.setDescription("No fue posible obtener el token");
            
-            return response;    
+            return responseDTO;    
         } 
         catch (Exception e) {
             logger.error(e.getMessage());
-            response.setStatus(0);
-            response.setDescriptionStatus("error");
-            response.setDescription("No fue posible obtener el token");
+            responseDTO.setStatus(0);
+            responseDTO.setDescriptionStatus("error");
+            responseDTO.setDescription("No fue posible obtener el token");
            
-            return response;     
+            return responseDTO;     
         }
         
     }
@@ -171,32 +199,32 @@ public class NotificacionServiceImpl implements INotificacionService{
      * @date 2023-01-26
      */
     @Override
-    public Response registerDevice(RegistrarToken data) {
-        Response response = new Response();
+    public ResponseDTO registerDevice(RegistrarTokenDTO data) {
+        ResponseDTO responseDTO = new ResponseDTO();
         try {
             RedisConnection<String, String> connection = redisConnectionService.getConnection();
             connection.set("pol_inhouse_"+data.getIdPersonal(), data.getToken());
             
-            response.setStatus(1);
-            response.setDescriptionStatus("success");
-            response.setDescription("Token registrado correctamente");
+            responseDTO.setStatus(1);
+            responseDTO.setDescriptionStatus("success");
+            responseDTO.setDescription("Token registrado correctamente");
             
-          return response;
+          return responseDTO;
           
         } catch (RedisCommandExecutionException e) {
             logger.error(e.getMessage());
-            response.setStatus(0);
-            response.setDescriptionStatus("error");
-            response.setDescription("Error al registrar token");
-            return response;
+            responseDTO.setStatus(0);
+            responseDTO.setDescriptionStatus("error");
+            responseDTO.setDescription("Error al registrar token");
+            return responseDTO;
             
         }
         catch (Exception e) {
             logger.error(e.getMessage());
-            response.setStatus(0);
-            response.setDescriptionStatus("error");
-            response.setDescription("Error al registrar token");
-            return response;
+            responseDTO.setStatus(0);
+            responseDTO.setDescriptionStatus("error");
+            responseDTO.setDescription("Error al registrar token");
+            return responseDTO;
             
         }
         

@@ -3,8 +3,8 @@ package com.grupocastores.notificacion.service;
 import java.util.List;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
-import com.grupocastores.notificacion.dto.RegistrarToken;
-import com.grupocastores.notificacion.dto.Response;
+import com.grupocastores.notificacion.dto.RegistrarTokenDTO;
+import com.grupocastores.notificacion.dto.ResponseDTO;
 
 
 public interface INotificacionService {
@@ -17,10 +17,10 @@ public interface INotificacionService {
      * @version 0.0.1
      * @author Oscar Eduardo Guerra Salcedo [OscarGuerra] 
      * @return void
-     * @throws Response 
+     * @throws ResponseDTO 
      * @date 2023-01-26
      */
-    public Response sendMulticast(List<String> tokens);
+    public ResponseDTO sendMulticast(List<String> tokens);
     
     /**
      * connectToRedis:Hace conexion a redis .
@@ -32,7 +32,7 @@ public interface INotificacionService {
      * @throws Exception 
      * @date 2023-01-25
      */
-    public Response getToken(int idPersonal);
+    public ResponseDTO getToken(int idPersonal);
     
     /**
      * registerDevice: registra un nuevo token en redis
@@ -44,6 +44,6 @@ public interface INotificacionService {
      * @throws Exception 
      * @date 2023-01-26
      */
-    public Response registerDevice(RegistrarToken data);
+    public ResponseDTO registerDevice(RegistrarTokenDTO data);
 
 }
