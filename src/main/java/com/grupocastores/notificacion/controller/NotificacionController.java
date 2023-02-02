@@ -37,7 +37,7 @@ public class NotificacionController {
     public ResponseDTO notificacionViaje(@RequestBody List<String> tokens) throws FileNotFoundException, FirebaseMessagingException {
         System.out.println(tokens);
         ResponseDTO notification = notificacionService.sendMulticast(tokens);
-        return null;
+        return notification;
         
     } 
     
