@@ -35,7 +35,10 @@ public class NotificacionController {
     
     @PostMapping("/sendMulticast")
     public ResponseDTO notificacionViaje(@RequestBody List<String> tokens) throws FileNotFoundException, FirebaseMessagingException {
-        System.out.println(tokens);
+        
+        if(tokens.isEmpty()) {
+            return new ResponseDTO(0, "error", "No existen tokens", null);
+        }
         ResponseDTO notification = notificacionService.sendMulticast(tokens);
         return notification;
         
