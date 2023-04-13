@@ -31,7 +31,7 @@ public class RedisConn {
     public RedisConn() {
         try {       
             this.redisClient = new RedisClient(
-                    RedisURI.create("redis://10.1.9.73:6379")); 
+                    RedisURI.create("redis://192.168.0.66:6379")); 
             this.connection = this.redisClient.connect();
           
         } catch (RedisConnectionException e) {
